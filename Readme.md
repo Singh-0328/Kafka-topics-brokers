@@ -108,3 +108,6 @@ Choosing an outdated backup shelf → some letters missing.
 
 
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/7a6af6e2-b27f-4d6b-9088-da9525ecb841" />
+Topic config --zookeeper --bootstrap-server 
+Broker config --bootstrap-server --bootstrap-server 
+Kafka metadata storage Zookeeper Kafka Raft (future) 
