@@ -1,0 +1,85 @@
+COMMAND TO check the output of the application by consuming from the output topic:
+kafka-console-consumer --bootstrap-server localhost:9092 --topic total_purchases --from-beginning --property print.key=true --property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+
+1️⃣ kafka-console-consumer
+This is the built-in Kafka CLI consumer.
+It’s a simple command-line tool that eads messages from a Kafka topic and prints them to your terminal.
+Good for testing, debugging, learning.
+Not used in real apps, but very useful for checking what’s inside a topic.
+Think of it as:
+“Show me what messages are in this Kafka topic.”
+2️⃣ --bootstrap-server localhost:9092
+This tells the consumer how to connect to the Kafka cluster.
+localhost → Kafka is running on the same machine you’re on.
+9092 → default Kafka port.
+What it does:
+It contacts this broker.
+Broker gives it metadata about:
+Topic
+Partitions
+Other brokers
+Then the consumer starts reading messages.
+If Kafka isn’t running on localhost:9092, this will fail.
+3️⃣ --topic total_purchases
+This specifies which topic to read from.
+Topic name: total_purchases
+This topic must already exist, and messages must be written to it (probably by some producer or Kafka Streams app in your lab).
+So this means:
+“I want to consume messages from the topic called total_purchases.”
+4️⃣ --from-beginning
+This flag decides where to start reading.
+Without it → consumer would read only new messages that arrive after it starts.
+With --from-beginning → consumer will read all old messages from offset 0 for that topic (for that consumer group).
+So:
+“Don’t just show new data, show me everything that was ever written to this topic.”
+Very useful for labs, demos, debugging.
+5️⃣ --property print.key=true
+Kafka messages actually have two parts:
+Key
+Value
+By default, kafka-console-consumer prints only the value.
+This property:
+--property print.key=true
+tells it:
+“Also print the key for each message, not just the value.”
+So output will look like:
+someKey   10
+user123   25
+store-1   40
+(Usually separated by a tab.)
+If you didn’t specify this, you’d only see the values:
+10
+25
+40
+6️⃣ --property value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+This is a very important part.
+Kafka always stores data as bytes.
+To show something human-readable, consumer needs to deserialize the bytes into some type.
+Here you are telling the console consumer:
+“Treat the value part of each message as an Integer.”
+org.apache.kafka.common.serialization.IntegerDeserializer
+is the built-in Kafka class that converts bytes → integer.
+
+So if the producer wrote values like:
+10
+20
+30
+in IntegerSerializer format, this consumer will decode them correctly and print them as numbers.
+If you did not specify this and used the default (String deserializer), you might see weird output or errors if the value isn’t really a string.
+Quick mapping:
+Producer used:
+value.serializer=org.apache.kafka.common.serialization.IntegerSerializer
+Consumer uses:
+value.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+They must match logically.
+Putting it all together
+This command means:
+“Use the console consumer to connect to the Kafka broker on localhost:9092, read all messages from the beginning of the topic total_purchases, decode the message values as integers, and print both the key and the integer value for each message.”
+So you’ll see something like:
+store-1     15
+store-2     30
+store-3     45
+
+Left side → key (because of print.key=true)
+Right side → integer value (because of IntegerDeserializer)
+Messages → from start to end of topic (because of --from-beginning)
