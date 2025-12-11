@@ -1,0 +1,39 @@
+command you use to add somethings in cluster via broker and topic
+Set unclean.leader.election.enable to true for the topic: 
+kafka-configs --zookeeper localhost:2181 --entity-type topics --entity-name inventory_purchases --alter --add-config unclean.leader.election.enable=true
+Topic: inventory_purchases
+Replication factor: 3
+In-sync replicas (ISR): Broker1, Broker2
+Now:
+Broker1 (leader) crashes
+Broker2 also becomes slow/out-of-sync
+Broker3 has old data
+WITH unclean leader election
+Kafka promotes Broker3 (old data) as leader → service continues.
+#########But you may lose the last few messages that were on Broker1 but not fully replicated.#######################
+Set the default retention period for the cluster to 259200000 ms: 
+kafka-configs --bootstrap-server localhost:9092 --entity-type brokers --entity-default --alter --add-config log.retention.ms=259200000 
+
+
+
+
+if you see we are using for topic zookeeper and for broker we are using bootstarp server. for new version no need to use zookeeper(Set Retention for a Topic (New Kafka Versions — NO Zookeeper)
+kafka-configs \
+  --bootstrap-server localhost:9092 \
+  --alter \
+  --entity-type topics \
+  --entity-name inventory_purchases \
+  --add-config retention.ms=259200000
+
+EXPLANATION OF COMMAND--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1. --bootstrap-server localhost:9092
+Connect directly to Kafka brokers
+(ZooKeeper is not used in new versions).
+2. --alter
+You are modifying an existing topic.
+3. --entity-type topics
+This change applies to a topic, not broker.
+4. --entity-name inventory_purchases
+This is the topic you want to modify.
+5. --add-config retention.ms=259200000
+Change retention to 259,200,000 ms = 3 days.
